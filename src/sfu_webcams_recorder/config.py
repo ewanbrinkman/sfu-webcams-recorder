@@ -12,7 +12,7 @@ BASE_DIR = Path.cwd() / "media"
 PICTURES_DIR = BASE_DIR / "pictures"
 VIDEOS_DIR = BASE_DIR / "videos"
 
-DEBUG_MODE = True
+DEBUG_MODE = False
 DEBUG_ITERATIONS = 3
 
 CAMERAS = {

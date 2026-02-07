@@ -11,3 +11,6 @@ wheels/
 
 # System files
 .DS_Store
+
+# SFU webcam files
+media
