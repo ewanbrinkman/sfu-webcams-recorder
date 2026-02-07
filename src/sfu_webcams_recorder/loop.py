@@ -2,8 +2,8 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 
 from .config import CAMERAS, INTERVAL, DEBUG_MODE, DEBUG_ITERATIONS, PICTURES_DIR
-from .downloader import download_image
-from .video import create_daily_video
+from .download_image import download_image
+from .create_daily_video import create_daily_video
 from .timeutils import log, day_folder_name
 
 
