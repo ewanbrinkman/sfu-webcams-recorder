@@ -15,3 +15,5 @@ Run the following:
 Stores each day as an `mp4` file. Also, a text file for each `mp4` lists the exact time of every video frame. This is useful if, for example, one wants to programatically extract captures at noon every day.
 
 ## Features
+
+- Download webcam images in parallel.

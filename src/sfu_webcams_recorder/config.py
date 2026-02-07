@@ -8,6 +8,8 @@ FFMPEG_CODEC_ARGS = [
     "-crf", "23",
 ]
 
+WEBCAM_TIMEOUT_SECONDS = 60
+
 BASE_DIR = Path.cwd() / "media"
 PICTURES_DIR = BASE_DIR / "pictures"
 VIDEOS_DIR = BASE_DIR / "videos"

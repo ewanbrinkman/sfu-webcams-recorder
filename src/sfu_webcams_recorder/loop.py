@@ -35,20 +35,13 @@ def camera_loop(code: str, url: str):
         if now < next_run:
             time.sleep(next_run - now)
 
-        start = time.time()
+        start = time.time() 
         log(f"Downloading {code}...")
         try:
             download_image(code, url)
         except Exception as e:
             log(f"Error downloading {code}: {e}")
         log(f"Done downloading {code}")
-
-        # Handle day rollover for this camera
-        today = day_folder_name()
-        camera_day_path = PICTURES_DIR / today / code
-        if camera_day_path.exists() and not any(camera_day_path.iterdir()):
-            # Nothing to do, folder is empty
-            pass
 
         # Schedule next run
         next_run += INTERVAL

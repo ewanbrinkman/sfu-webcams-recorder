@@ -3,7 +3,7 @@ from pathlib import Path
 import requests
 
 from .timeutils import iso_filename, day_folder_name, log
-from .config import PICTURES_DIR
+from .config import PICTURES_DIR, WEBCAM_TIMEOUT_SECONDS
 
 
 def md5sum(path: Path) -> str:
@@ -22,7 +22,7 @@ def download_image(code: str, url: str) -> Path | None:
     outfile = camdir / f"{code}_{iso_filename()}.jpg"
 
     try:
-        r = requests.get(url, timeout=10)
+        r = requests.get(url, timeout=WEBCAM_TIMEOUT_SECONDS)
         r.raise_for_status()
         outfile.write_bytes(r.content)
     except Exception:
