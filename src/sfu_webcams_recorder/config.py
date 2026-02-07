@@ -8,14 +8,16 @@ FFMPEG_CODEC_ARGS = [
     "-crf", "23",
 ]
 
-WEBCAM_TIMEOUT_SECONDS = 60
+DOWNLOAD_TIMEOUT_SECONDS = 60
+VIDEO_CREATE_EXTRA_DELAY = 60
 
 BASE_DIR = Path.cwd() / "media"
 PICTURES_DIR = BASE_DIR / "pictures"
 VIDEOS_DIR = BASE_DIR / "videos"
 
-DEBUG_MODE = False
+DEBUG_VIDEO_CREATE = False
 DEBUG_ITERATIONS = 3
+DEBUG_DOWNLOAD_DELAY = False
 
 CAMERAS = {
     "aqn": "https://ns-webcams.its.sfu.ca/public/images/aqn-current.jpg",

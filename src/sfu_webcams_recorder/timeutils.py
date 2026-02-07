@@ -21,5 +21,5 @@ def day_folder_name(dt=None):
     return f"{dt.year}-{dt.month}-{dt.day}-{dt.strftime('%a').lower()[:3]}"
 
 
-def log(msg: str):
-    print(f"[{timestamp_str()}] {msg}", flush=True)
+def log(msg: str, prepend=""):
+    print(f"{prepend}[{timestamp_str()}] {msg}", flush=True)

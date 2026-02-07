@@ -1,7 +1,7 @@
 import time
 from threading import Thread
 
-from .config import CAMERAS, INTERVAL, DEBUG_MODE, DEBUG_ITERATIONS, PICTURES_DIR
+from .config import CAMERAS, INTERVAL, DEBUG_VIDEO_CREATE, DEBUG_ITERATIONS, PICTURES_DIR, DOWNLOAD_TIMEOUT_SECONDS, VIDEO_CREATE_EXTRA_DELAY
 from .download_image import download_image
 from .create_daily_video import create_daily_video
 from .timeutils import log, day_folder_name
@@ -9,6 +9,12 @@ from .timeutils import log, day_folder_name
 
 def combine_day(day: str):
     """Create daily videos for all cameras and clean up empty folders."""
+    # Make sure all pictures get written.
+    video_create_delay = DOWNLOAD_TIMEOUT_SECONDS + VIDEO_CREATE_EXTRA_DELAY
+    log("Waiting {video_create_delay}s to make sure all pictures are written first...")
+    time.sleep(video_create_delay)
+    log("Done waiting.")
+    
     for code in CAMERAS:
         create_daily_video(code, day)
 
@@ -41,14 +47,17 @@ def camera_loop(code: str, url: str):
             download_image(code, url)
         except Exception as e:
             log(f"Error downloading {code}: {e}")
-        log(f"Done downloading {code}")
 
         # Schedule next run
-        next_run += INTERVAL
-        elapsed = time.time() - start
+        now = time.time()
+        elapsed = now - start
         if elapsed > INTERVAL:
             # Download took longer than interval → next run immediately
-            next_run = time.time()
+            next_run = now
+        else:
+            next_run += INTERVAL
+        
+        log(f"Downloaded {code} in {elapsed:.1f}s. Waiting {next_run - now:.1f}s...")
 
 
 def run_loop():
@@ -56,7 +65,7 @@ def run_loop():
     Start independent loops for all cameras.
     Handles daily combine for completed days in the background.
     """
-    log("====== Starting Independent Recorder ======")
+    log("====== Starting Webcam Recorder ======")
     log(f"Interval per camera: {INTERVAL}s")
 
     current_day = day_folder_name()
@@ -77,16 +86,17 @@ def run_loop():
 
             # Day rollover check
             if today != current_day:
-                log(f"New day detected. Combining {current_day}")
+                log(f"New day detected. Combining {current_day}...")
                 combine_day(current_day)
                 current_day = today
 
             loop_counter += 1
 
             # Debug mode: trigger combine every DEBUG_ITERATIONS iterations
-            if DEBUG_MODE and loop_counter % DEBUG_ITERATIONS == 0:
+            if DEBUG_VIDEO_CREATE and loop_counter % DEBUG_ITERATIONS == 0:
                 log("Debug mode triggered daily combine")
                 combine_day(current_day)
 
     except KeyboardInterrupt:
-        log("Shutting down recorder...")
+        # Prepend a newline so the "^C" from keyboard interrupt is on its own line.
+        log("Shutting down recorder...", prepend="\n")
