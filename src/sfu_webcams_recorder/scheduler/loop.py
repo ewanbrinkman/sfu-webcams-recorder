@@ -1,20 +1,22 @@
+from datetime import timedelta
 import time
 from threading import Thread
 
-from ..config import PICTURES_DIR, VIDEOS_DIR, CAMERAS, INTERVAL, DEBUG_VIDEO_CREATE, DEBUG_ITERATIONS, PICTURES_DIR, DOWNLOAD_TIMEOUT_SECONDS, VIDEO_CREATE_EXTRA_DELAY
+from ..config import PICTURES_DIR, VIDEOS_DIR, CAMERAS, INTERVAL, PICTURES_DIR, DOWNLOAD_TIMEOUT_SECONDS, VIDEO_CREATE_EXTRA_DELAY, DEBUG_VIDEO_CREATE
 from ..downloader.image import download_image
 from ..video.create_daily_video import create_daily_video
-from ..utils import log, day_folder_name, debug_enabled
+from ..utils import log, day_folder_name, debug_enabled, sleep_until_tomorrow
 
 
 def combine_day(day: str):
     """Create daily videos for all cameras and clean up empty day folders."""
     
     # Make sure all pictures get written.
-    video_create_delay = DOWNLOAD_TIMEOUT_SECONDS + VIDEO_CREATE_EXTRA_DELAY
-    log("Waiting {video_create_delay}s to make sure all pictures are written first...")
-    time.sleep(video_create_delay)
-    log("Done waiting.")
+    if not DEBUG_VIDEO_CREATE:
+        video_create_delay = DOWNLOAD_TIMEOUT_SECONDS + VIDEO_CREATE_EXTRA_DELAY
+        log(f"Waiting {video_create_delay}s to make sure all pictures are written first...")
+        time.sleep(video_create_delay)
+        log("Done waiting.")
     
     for code in CAMERAS:
         create_daily_video(code, day)
@@ -51,11 +53,11 @@ def camera_loop(code: str, url: str):
         except Exception as e:
             log(f"Error downloading {code}: {e}")
 
-        # Schedule next run
+        # Schedule next run.
         now = time.time()
         elapsed = now - start
         if elapsed > INTERVAL:
-            # Download took longer than interval → next run immediately
+            # Download took longer than interval => next run immediately.
             next_run = now
         else:
             next_run += INTERVAL
@@ -81,33 +83,22 @@ def run_loop():
     init_loop()
 
     current_day = day_folder_name()
-    loop_counter = 0
 
-    # Start independent threads for each camera
+    # Start independent threads for each camera.
     threads = []
     for code, url in CAMERAS.items():
         t = Thread(target=camera_loop, args=(code, url), daemon=True)
         t.start()
         threads.append(t)
 
-    # Main loop for daily video creation & debug handling
+    # Main loop for daily video creation & debug handling.
     try:
         while True:
-            time.sleep(1)
-            today = day_folder_name()
+            sleep_until_tomorrow(current_day)
 
-            # Day rollover check
-            if today != current_day:
-                log(f"New day detected. Combining {current_day}...")
-                combine_day(current_day)
-                current_day = today
-
-            loop_counter += 1
-
-            # Debug mode: trigger combine every DEBUG_ITERATIONS iterations
-            if DEBUG_VIDEO_CREATE and loop_counter % DEBUG_ITERATIONS == 0:
-                log("Debug mode triggered daily combine")
-                combine_day(current_day)
+            log(f"New day detected. Combining {current_day}...")
+            combine_day(current_day)
+            current_day = day_folder_name()
 
     except KeyboardInterrupt:
         # Prepend a newline so the "^C" from keyboard interrupt is on its own line.

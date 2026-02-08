@@ -35,13 +35,13 @@ def download_image(code: str, url: str) -> Path | None:
             outfile.unlink()
         return None
 
-    # Duplicate detection
+    # Duplicate detection.
     files = sorted(camdir.glob("*.jpg"), key=lambda p: p.stat().st_mtime, reverse=True)
 
     if len(files) > 1:
         last_file = files[1]
         if md5sum(last_file) == md5sum(outfile):
-            log(f"Removing duplicate image for {outfile}")
+            log(f"Removing duplicate image for {code}")
             outfile.unlink()
             return None
 
