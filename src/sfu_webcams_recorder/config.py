@@ -32,8 +32,14 @@ VIDEOS_DIR = BASE_DIR / "videos"
 # -----------------------------
 
 DEBUG_VIDEO_CREATE = False
-DEBUG_ITERATIONS = 3
 DEBUG_DOWNLOAD_DELAY = False
+DEBUG_ITERATIONS = 3
+
+# -----------------------------
+# Logging
+# -----------------------------
+
+LOG_USE_24H = False
 
 # -----------------------------
 # Camera

@@ -4,10 +4,12 @@ from threading import Thread
 from ..config import PICTURES_DIR, VIDEOS_DIR, CAMERAS, INTERVAL, DEBUG_VIDEO_CREATE, DEBUG_ITERATIONS, PICTURES_DIR, DOWNLOAD_TIMEOUT_SECONDS, VIDEO_CREATE_EXTRA_DELAY
 from ..downloader.image import download_image
 from ..video.create_daily_video import create_daily_video
-from ..utils import log, day_folder_name
+from ..utils import log, day_folder_name, debug_enabled
+
 
 def combine_day(day: str):
-    """Create daily videos for all cameras and clean up empty folders."""
+    """Create daily videos for all cameras and clean up empty day folders."""
+    
     # Make sure all pictures get written.
     video_create_delay = DOWNLOAD_TIMEOUT_SECONDS + VIDEO_CREATE_EXTRA_DELAY
     log("Waiting {video_create_delay}s to make sure all pictures are written first...")
@@ -29,10 +31,12 @@ def combine_day(day: str):
 
 def camera_loop(code: str, url: str):
     """
-    Independent loop for a single camera.
+    Independent thread for continuously downloading images for a single camera.
+    
     Downloads every INTERVAL seconds; waits remaining time if download finishes early,
     or starts immediately if download takes longer than INTERVAL.
     """
+    
     next_run = time.time()
 
     while True:
@@ -60,18 +64,20 @@ def camera_loop(code: str, url: str):
         
 
 def init_loop():
+    """Initialize directories and log startup information for the recorder."""
+    
     PICTURES_DIR.mkdir(parents=True, exist_ok=True)
     VIDEOS_DIR.mkdir(parents=True, exist_ok=True)
     
     log("====== Starting Webcam Recorder ======")
     log(f"Interval per camera: {INTERVAL}s")
+    log(f"Debug enabled: {debug_enabled()}")
+    log("======================================")
 
 
 def run_loop():
-    """
-    Start independent loops for all cameras.
-    Handles daily combine for completed days in the background.
-    """
+    """Start camera threads and handle daily video creation and debug tasks."""
+    
     init_loop()
 
     current_day = day_folder_name()

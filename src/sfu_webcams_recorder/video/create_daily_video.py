@@ -8,6 +8,8 @@ from ..utils import log
 
 
 def create_daily_video(code: str, day: str):
+    """Create a daily video from images and save timestamps for a single camera."""
+    
     camdir = PICTURES_DIR / day / code
     imgs = sorted(camdir.glob("*.jpg"))
 
