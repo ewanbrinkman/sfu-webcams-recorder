@@ -1,6 +1,9 @@
 from pathlib import Path
 
-INTERVAL = 10
+# -----------------------------
+# Video
+# -----------------------------
+
 FPS = 60
 FFMPEG_CODEC_ARGS = [
     "-c:v", "libx264",
@@ -8,16 +11,33 @@ FFMPEG_CODEC_ARGS = [
     "-crf", "23",
 ]
 
+# -----------------------------
+# Image Download
+# -----------------------------
+
+INTERVAL = 10
 DOWNLOAD_TIMEOUT_SECONDS = 60
 VIDEO_CREATE_EXTRA_DELAY = 60
+
+# -----------------------------
+# Path
+# -----------------------------
 
 BASE_DIR = Path.cwd() / "media"
 PICTURES_DIR = BASE_DIR / "pictures"
 VIDEOS_DIR = BASE_DIR / "videos"
 
+# -----------------------------
+# Debug
+# -----------------------------
+
 DEBUG_VIDEO_CREATE = False
 DEBUG_ITERATIONS = 3
 DEBUG_DOWNLOAD_DELAY = False
+
+# -----------------------------
+# Camera
+# -----------------------------
 
 CAMERAS = {
     "aqn": "https://ns-webcams.its.sfu.ca/public/images/aqn-current.jpg",

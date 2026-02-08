@@ -1,10 +1,10 @@
 import time
 from threading import Thread
 
-from .config import CAMERAS, INTERVAL, DEBUG_VIDEO_CREATE, DEBUG_ITERATIONS, PICTURES_DIR, DOWNLOAD_TIMEOUT_SECONDS, VIDEO_CREATE_EXTRA_DELAY
-from .download_image import download_image
-from .create_daily_video import create_daily_video
-from .timeutils import log, day_folder_name
+from ..config import CAMERAS, INTERVAL, DEBUG_VIDEO_CREATE, DEBUG_ITERATIONS, PICTURES_DIR, DOWNLOAD_TIMEOUT_SECONDS, VIDEO_CREATE_EXTRA_DELAY
+from ..downloader.image import download_image
+from ..video.create_daily_video import create_daily_video
+from ..utils import log, day_folder_name
 
 
 def combine_day(day: str):

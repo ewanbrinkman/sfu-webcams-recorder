@@ -4,8 +4,8 @@ import requests
 import time
 import random
 
-from .timeutils import iso_filename, day_folder_name, log
-from .config import PICTURES_DIR, DOWNLOAD_TIMEOUT_SECONDS, DEBUG_DOWNLOAD_DELAY
+from ..utils import iso_filename, day_folder_name, log
+from ..config import PICTURES_DIR, DOWNLOAD_TIMEOUT_SECONDS, DEBUG_DOWNLOAD_DELAY
 
 
 def md5sum(path: Path) -> str:
