@@ -1,4 +1,3 @@
-from pathlib import Path
 from .scheduler.loop import run_loop
 
 
