@@ -1,5 +1,4 @@
 from pathlib import Path
-from .config import PICTURES_DIR, VIDEOS_DIR
 from .scheduler.loop import run_loop
 
 
