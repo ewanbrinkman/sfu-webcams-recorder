@@ -26,16 +26,19 @@ def render_table():
 
     with state_lock:
         for code, s in camera_state.items():
-
-            encode_time = "Idle"
-            if s['video_start']:
-                encode_time = fmt_seconds(now - s["video_start"])
-
+            
+            downloader = fmt_seconds(now - s['download_start_time']) if s['status'] == "Downloading" else s['status']
+            encode_time = fmt_seconds(now - s["video_start_time"]) if s['video_start_time'] else "Idle"
+                
+            next_download = "-"
+            remaining_download_wait_time = max(0, s["next_run"] - now)
+            next_download = "Previous Download Is Hanging" if remaining_download_wait_time == 0 else fmt_seconds(remaining_download_wait_time)
+            
             table.add_row(
                 code,
-                fmt_seconds(now - s['download_start_time']) if s['status'] == "Downloading" else s['status'] ,
+                downloader,
                 fmt_seconds(s['last_elapsed']),
-                fmt_seconds(s['next_run'] - now) if s['status'] == "Sleeping" else "-",
+                next_download,
                 encode_time,
                 s['error'] or "-"
             )

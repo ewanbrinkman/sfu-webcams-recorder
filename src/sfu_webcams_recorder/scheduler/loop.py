@@ -13,13 +13,13 @@ def combine_day(day: str, code: str):
     """Create daily videos and update UI state."""
 
     with state_lock:
-        camera_state[code]["video_start"] = time.time()
+        camera_state[code]["video_start_time"] = time.time()
 
     try:
         create_daily_video(code, day)
     finally:
         with state_lock:
-            camera_state[code]["video_start"] = None
+            camera_state[code]["video_start_time"] = None
 
     # cleanup empty day folder
     day_path = PICTURES_DIR / day
@@ -42,7 +42,6 @@ def camera_loop(code: str, url: str):
         if now < next_run:
             with state_lock:
                 camera_state[code]["status"] = "Sleeping"
-                camera_state[code]["next_run"] = next_run
             time.sleep(next_run - now)
 
         # downloading phase
@@ -50,7 +49,7 @@ def camera_loop(code: str, url: str):
         with state_lock:
             camera_state[code]["status"] = "Downloading"
             camera_state[code]['download_start_time'] = start
-            camera_state[code]["next_run"] = 0
+            camera_state[code]["next_run"] = start + INTERVAL
 
         try:
             download_image(code, url)
@@ -101,7 +100,7 @@ def run_loop():
                 "download_start_time": None,
                 "last_elapsed": None,
                 "next_run": None,
-                "video_start": None,
+                "video_start_time": None,
                 "error": None,
             }
 
