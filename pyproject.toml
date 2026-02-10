@@ -4,7 +4,11 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = ["pytz", "requests"]
+dependencies = [
+    "pytz",
+    "requests",
+    "rich>=14.3.2",
+]
 
 [project.scripts]
 sfu-webcams-recorder = "sfu_webcams_recorder.main:main"

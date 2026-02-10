@@ -4,17 +4,13 @@ import tempfile
 from pathlib import Path
 
 from ..config import PICTURES_DIR, VIDEOS_DIR, FPS, FFMPEG_CODEC_ARGS
-from ..utils import log
 
 
 def create_daily_video(code: str, day: str):
-    """Create a daily video from images and save timestamps for a single camera."""
-    
     camdir = PICTURES_DIR / day / code
     imgs = sorted(camdir.glob("*.jpg"))
 
     if not imgs:
-        log(f"No images for {code} on {day}, skipping.")
         return
 
     video_dir = VIDEOS_DIR / day / "videos"
@@ -54,11 +50,8 @@ def create_daily_video(code: str, day: str):
 
         if result.returncode == 0 and tmp_out.exists():
             tmp_out.rename(outfile)
-            log(f"Daily video created: {outfile}")
             shutil.rmtree(camdir)
         else:
-            log(f"Video creation FAILED for {code} on {day}")
             return
 
         timestamps_file.write_text("\n".join(timestamps))
-        log(f"Timestamps saved to: {timestamps_file}")
