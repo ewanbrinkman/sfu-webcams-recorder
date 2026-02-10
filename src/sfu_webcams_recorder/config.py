@@ -17,7 +17,6 @@ FFMPEG_CODEC_ARGS = [
 
 INTERVAL = 10
 DOWNLOAD_TIMEOUT_SECONDS = 60
-VIDEO_CREATE_EXTRA_DELAY = 60 * 60 * 1
 
 # -----------------------------
 # Path

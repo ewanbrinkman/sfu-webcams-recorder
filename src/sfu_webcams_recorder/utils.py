@@ -14,25 +14,6 @@ def now():
     return datetime.datetime.now(TZ)
 
 
-def sleep_until_tomorrow(current_day: str):
-    """Sleep until the next calendar day in Vancouver timezone."""
-    
-    if DEBUG_VIDEO_CREATE:
-        log(f"Sleeping {DEBUG_VIDEO_CREATE_SLEEP_SECONDS:.1f}s until debug sleep time is done for video creation...")
-        time.sleep(DEBUG_VIDEO_CREATE_SLEEP_SECONDS)
-        return
-    
-    while day_folder_name() == current_day:
-        now_dt = now()
-        tomorrow_midnight = (now_dt + datetime.timedelta(days=1)).replace(
-            hour=0, minute=0, second=0, microsecond=0
-        )
-        sleep_seconds = (tomorrow_midnight - now_dt).total_seconds()
-        
-        log(f"Sleeping {sleep_seconds:.1f}s until next day for video creation...")
-        time.sleep(sleep_seconds)
-
-
 def timestamp_str():
     """Return a timestamp string formatted for logging."""
     
