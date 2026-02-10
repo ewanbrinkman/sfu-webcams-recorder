@@ -42,13 +42,14 @@ def camera_loop(code: str, url: str):
         if now < next_run:
             with state_lock:
                 camera_state[code]["status"] = "Sleeping"
-                camera_state[code]["next_run"] = next_run - now
+                camera_state[code]["next_run"] = next_run
             time.sleep(next_run - now)
 
         # downloading phase
         start = time.time()
         with state_lock:
             camera_state[code]["status"] = "Downloading"
+            camera_state[code]['download_start_time'] = start
             camera_state[code]["next_run"] = 0
 
         try:
@@ -64,6 +65,7 @@ def camera_loop(code: str, url: str):
 
         with state_lock:
             camera_state[code]["last_elapsed"] = elapsed
+            camera_state[code]['download_start_time'] = None
 
         # detect new day
         updated_day = day_folder_name()
@@ -95,9 +97,10 @@ def run_loop():
     for code, url in CAMERAS.items():
         with state_lock:
             camera_state[code] = {
-                "status": "starting",
-                "last_elapsed": 0,
-                "next_run": 0,
+                "status": "Starting",
+                "download_start_time": None,
+                "last_elapsed": None,
+                "next_run": None,
                 "video_start": None,
                 "error": None,
             }

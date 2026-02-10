@@ -33,9 +33,9 @@ def render_table():
 
             table.add_row(
                 code,
-                s['status'],
+                fmt_seconds(now - s['download_start_time']) if s['status'] == "Downloading" else s['status'] ,
                 fmt_seconds(s['last_elapsed']),
-                fmt_seconds(s['next_run']),
+                fmt_seconds(s['next_run'] - now) if s['status'] == "Sleeping" else "-",
                 encode_time,
                 s['error'] or "-"
             )
@@ -44,7 +44,7 @@ def render_table():
 
 
 def ui_loop():
-    with Live(render_table(), refresh_per_second=4, screen=True) as live:
+    with Live(render_table(), refresh_per_second=10, screen=True) as live:
         while True:
-            time.sleep(0.25)
+            time.sleep(0.1)
             live.update(render_table())
