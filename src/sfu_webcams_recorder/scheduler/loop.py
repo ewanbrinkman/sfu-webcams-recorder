@@ -13,14 +13,12 @@ def combine_day(day: str, code: str):
     """Create daily videos and update UI state."""
 
     with state_lock:
-        camera_state[code]["video"] = "encoding"
         camera_state[code]["video_start"] = time.time()
 
     try:
         create_daily_video(code, day)
     finally:
         with state_lock:
-            camera_state[code]["video"] = "idle"
             camera_state[code]["video_start"] = None
 
     # cleanup empty day folder
@@ -43,24 +41,24 @@ def camera_loop(code: str, url: str):
         # sleeping phase
         if now < next_run:
             with state_lock:
-                camera_state[code]["status"] = "sleeping"
+                camera_state[code]["status"] = "Sleeping"
                 camera_state[code]["next_run"] = next_run - now
             time.sleep(next_run - now)
 
         # downloading phase
         start = time.time()
         with state_lock:
-            camera_state[code]["status"] = "downloading"
+            camera_state[code]["status"] = "Downloading"
             camera_state[code]["next_run"] = 0
 
         try:
             download_image(code, url)
+            # raise TabError
             with state_lock:
                 camera_state[code]["error"] = None
         except Exception as e:
             with state_lock:
-                camera_state[code]["status"] = "error"
-                camera_state[code]["error"] = str(e)
+                camera_state[code]["error"] = f"{type(e).__name__}: {str(e) if str(e) != "None" else "(No Description)"}"
 
         elapsed = time.time() - start
 
@@ -100,7 +98,6 @@ def run_loop():
                 "status": "starting",
                 "last_elapsed": 0,
                 "next_run": 0,
-                "video": "idle",
                 "video_start": None,
                 "error": None,
             }

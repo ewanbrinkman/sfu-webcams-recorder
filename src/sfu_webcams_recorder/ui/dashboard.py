@@ -6,7 +6,7 @@ from rich import box
 from .state import camera_state, state_lock
 
 
-def fmt_seconds(value):
+def fmt_seconds(value: float):
     if not value:
         return "-"
     return f"{value:.1f}s"
@@ -17,10 +17,9 @@ def render_table():
 
     table.add_column("Camera")
     table.add_column("Downloader")
-    table.add_column("Last DL")
-    table.add_column("Next DL")
-    table.add_column("Video")
-    table.add_column("Encode Time")
+    table.add_column("Last Download")
+    table.add_column("Next Download")
+    table.add_column("Video Encoding")
     table.add_column("Error")
 
     now = time.time()
@@ -28,18 +27,17 @@ def render_table():
     with state_lock:
         for code, s in camera_state.items():
 
-            encode_time = "-"
-            if s.get("video") == "encoding" and s.get("video_start"):
+            encode_time = "Idle"
+            if s['video_start']:
                 encode_time = fmt_seconds(now - s["video_start"])
 
             table.add_row(
                 code,
-                s.get("status", "-"),
-                fmt_seconds(s.get("last_elapsed")),
-                fmt_seconds(s.get("next_run")),
-                s.get("video", "-"),
+                s['status'],
+                fmt_seconds(s['last_elapsed']),
+                fmt_seconds(s['next_run']),
                 encode_time,
-                s.get("error") or "",
+                s['error'] or "-"
             )
 
     return table
