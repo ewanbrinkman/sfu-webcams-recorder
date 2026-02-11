@@ -1,6 +1,6 @@
 """The program state."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import StrEnum, auto
 import time
 from threading import Lock
@@ -36,10 +36,15 @@ class WebcamState:
     error: str | None = None
 
 
-# Shared state dictionary for all webcams, keyed by `WebcamID`.
-webcam_state: dict[WebcamID, WebcamState] = {}
-# Other state.
-program_start_time = time.time()
+@dataclass(slots=True)
+class ProgramState:
+    """Shared program-wide state."""
 
-# Lock to protect access to `webcam_state` from multiple threads.
-state_lock = Lock()
+    webcam_state: dict[WebcamID, WebcamState] = field(default_factory=dict)
+    start_time: float = field(default_factory=time.time)
+    total_downloaded_bytes: int = 0
+    lock: Lock = field(default_factory=Lock)
+
+
+# Singleton instance of program-wide state
+program_state = ProgramState()

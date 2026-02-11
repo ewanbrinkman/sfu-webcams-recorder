@@ -13,6 +13,7 @@ from sfu_webcams_recorder.config.settings import (
     DOWNLOAD_TIMEOUT_SECONDS,
     DEBUG_DOWNLOAD_DELAY,
 )
+from sfu_webcams_recorder.ui.state import program_state
 
 
 class DuplicateWebcamImageError(Exception):
@@ -52,6 +53,8 @@ def download_webcam_image(code: str, url: str) -> Path:
             time.sleep(random.uniform(1, 30))
         r.raise_for_status()
         outfile.write_bytes(r.content)
+        with program_state.lock:
+            program_state.total_downloaded_bytes += len(r.content)
     except (requests.RequestException, OSError):
         if outfile.exists():
             outfile.unlink()

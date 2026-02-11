@@ -10,11 +10,9 @@ from rich.align import Align
 from rich.text import Text
 
 from sfu_webcams_recorder.ui.state import (
-    webcam_state,
-    state_lock,
+    program_state,
     DownloadState,
     VideoState,
-    program_start_time,
 )
 from sfu_webcams_recorder.utils import debug_enabled
 
@@ -44,6 +42,7 @@ def fmt_duration(seconds: float) -> str:
 
 
 def render_table():
+    """Render the UI table."""
     table = Table(box=box.SIMPLE)
 
     table.add_column("Webcam")
@@ -55,8 +54,8 @@ def render_table():
 
     now = time.time()
 
-    with state_lock:
-        for cam_id, state in webcam_state.items():
+    with program_state.lock:
+        for cam_id, state in program_state.webcam_state.items():
             # Downloader column: show elapsed time if downloading, else state name.
             if (
                 state.download_state == DownloadState.DOWNLOADING
@@ -105,13 +104,13 @@ def render_table():
             )
 
     # Header panel
-    uptime = time.time() - program_start_time
+    uptime = time.time() - program_state.start_time
 
     console = Console()
     table_width = console.measure(table).maximum
 
     header_text = Text(
-        f"Started: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(program_start_time))}\n"
+        f"Started: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(program_state.start_time))}\n"
         f"Uptime: {fmt_duration(uptime)}\n"
         f"Debug Enabled: {debug_enabled()}"
     )

@@ -14,8 +14,7 @@ from sfu_webcams_recorder.io.webcam import (
 from sfu_webcams_recorder.io.video import create_daily_video
 from sfu_webcams_recorder.utils import day_folder_name
 from sfu_webcams_recorder.ui.state import (
-    webcam_state,
-    state_lock,
+    program_state,
     WebcamState,
     DownloadState,
     VideoState,
@@ -26,16 +25,16 @@ from sfu_webcams_recorder.ui.dashboard import ui_loop
 def combine_day(day: str, cam_id: WebcamID):
     """Create daily videos and update UI state."""
 
-    with state_lock:
-        webcam_state[cam_id].video_create_start_time = time.time()
-        webcam_state[cam_id].video_state = VideoState.ENCODING
+    with program_state.lock:
+        program_state.webcam_state[cam_id].video_create_start_time = time.time()
+        program_state.webcam_state[cam_id].video_state = VideoState.ENCODING
 
     try:
         create_daily_video(cam_id.name.lower(), day)
     finally:
-        with state_lock:
-            webcam_state[cam_id].video_create_start_time = None
-            webcam_state[cam_id].video_state = VideoState.IDLE
+        with program_state.lock:
+            program_state.webcam_state[cam_id].video_create_start_time = None
+            program_state.webcam_state[cam_id].video_state = VideoState.IDLE
 
     # Cleanup empty day folder.
     day_path = PICTURES_DIR / day
@@ -55,31 +54,35 @@ def webcam_loop(cam_id: WebcamID, url: str):
 
         # Sleeping phase.
         if now < next_run:
-            with state_lock:
-                webcam_state[cam_id].download_state = DownloadState.SLEEPING
+            with program_state.lock:
+                program_state.webcam_state[
+                    cam_id
+                ].download_state = DownloadState.SLEEPING
             time.sleep(next_run - now)
 
         # Downloading phase.
         start = time.time()
-        with state_lock:
-            webcam_state[cam_id].download_state = DownloadState.DOWNLOADING
-            webcam_state[cam_id].download_start_time = start
-            webcam_state[cam_id].next_run_time = start + INTERVAL
+        with program_state.lock:
+            program_state.webcam_state[
+                cam_id
+            ].download_state = DownloadState.DOWNLOADING
+            program_state.webcam_state[cam_id].download_start_time = start
+            program_state.webcam_state[cam_id].next_run_time = start + INTERVAL
 
         try:
             download_webcam_image(cam_id.name.lower(), url)
-            with state_lock:
-                webcam_state[cam_id].error = None
+            with program_state.lock:
+                program_state.webcam_state[cam_id].error = None
         except (requests.RequestException, OSError, DuplicateWebcamImageError) as e:
-            with state_lock:
-                webcam_state[
+            with program_state.lock:
+                program_state.webcam_state[
                     cam_id
                 ].error = f"{type(e).__name__}: {str(e) if str(e) != 'None' else '(No Description)'}"
 
         elapsed = time.time() - start
-        with state_lock:
-            webcam_state[cam_id].last_download_elapsed_time = elapsed
-            webcam_state[cam_id].download_start_time = None
+        with program_state.lock:
+            program_state.webcam_state[cam_id].last_download_elapsed_time = elapsed
+            program_state.webcam_state[cam_id].download_start_time = None
 
         # Detect new day.
         updated_day = day_folder_name()
@@ -107,8 +110,8 @@ def run_loop():
 
     # Initialize state and start threads.
     for cam_id, url in WEBCAM_URLS.items():
-        with state_lock:
-            webcam_state[cam_id] = WebcamState()
+        with program_state.lock:
+            program_state.webcam_state[cam_id] = WebcamState()
 
         Thread(target=webcam_loop, args=(cam_id, url), daemon=True).start()
 
