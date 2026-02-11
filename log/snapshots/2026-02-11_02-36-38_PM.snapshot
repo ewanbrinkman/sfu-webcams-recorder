@@ -1,0 +1,50 @@
+╭──────────────────────────── SFU Webcams Recorder ────────────────────────────╮
+│ Started: 2026-02-11 02:36:28 PM                                              │
+│ Uptime: 10s                                                                  │
+│ Debug Enabled: True                                                          │
+│ Total Downloaded: 0.00 GB (9 Images)                                         │
+│ Download Rate: 12.89 GB/day                                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+                                                                                
+                          Last          Next                                    
+                          Download      Download      Video                     
+  Webcam     Downloader   Elapsed       Start         Encoding     Error        
+ ────────────────────────────────────────────────────────────────────────────── 
+  aqn        Sleeping     0.3s          0.0s          Idle         DuplicateW…  
+                                                                   Downloaded   
+                                                                   image is     
+                                                                   identical    
+                                                                   to previous  
+  aqsw       Sleeping     0.3s          0.0s          Idle         DuplicateW…  
+                                                                   Downloaded   
+                                                                   image is     
+                                                                   identical    
+                                                                   to previous  
+  aqse       Sleeping     0.5s          0.0s          Idle         DuplicateW…  
+                                                                   Downloaded   
+                                                                   image is     
+                                                                   identical    
+                                                                   to previous  
+  gaglardi   Sleeping     0.2s          0.0s          Idle         -            
+  towern     Sleeping     0.2s          0.0s          Idle         DuplicateW…  
+                                                                   Downloaded   
+                                                                   image is     
+                                                                   identical    
+                                                                   to previous  
+  towers     Sleeping     0.4s          0.0s          Idle         DuplicateW…  
+                                                                   Downloaded   
+                                                                   image is     
+                                                                   identical    
+                                                                   to previous  
+  udn        Sleeping     0.3s          0.0s          Idle         DuplicateW…  
+                                                                   Downloaded   
+                                                                   image is     
+                                                                   identical    
+                                                                   to previous  
+  wmcroof    Sleeping     1.0s          0.0s          Idle         -            
+  brh        Sleeping     0.9s          0.0s          Idle         DuplicateW…  
+                                                                   Downloaded   
+                                                                   image is     
+                                                                   identical    
+                                                                   to previous  
+                                                                                

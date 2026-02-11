@@ -1,5 +1,6 @@
 """The visual dashboard displaying status information of the program."""
 
+import logging
 import time
 from rich.live import Live
 from rich.table import Table
@@ -15,6 +16,30 @@ from sfu_webcams_recorder.ui.state import (
     VideoState,
 )
 from sfu_webcams_recorder.utils import debug_enabled
+from sfu_webcams_recorder.config.settings import SNAPSHOT_DIR, USE_24H_CLOCK
+
+
+logger = logging.getLogger(__name__)
+
+
+def fmt_filename_timestamp(dt):
+    """Replace characters so the time can be used as a filename."""
+    formatted = fmt_timestamp(dt)
+    return formatted.replace(":", "-").replace(" ", "_")
+
+
+def save_dashboard_snapshot():
+    """Save an exact snapshot of the current dashboard."""
+    console = Console(record=True, width=80)
+    console.print(render_table())
+    text = console.export_text()
+
+    ts = fmt_filename_timestamp(time.localtime())
+    filename = SNAPSHOT_DIR / f"{ts}.snapshot"
+
+    filename.write_text(text)
+
+    logger.info("Snapshot saved: %s", filename.name)
 
 
 def format_bytes(size_bytes: int) -> str:
@@ -37,6 +62,17 @@ def gb_per_day() -> str:
 def fmt_seconds(value: float):
     """Format seconds as 1 decimal place, or '-' if None or 0."""
     return f"{value:.1f}s"
+
+
+def fmt_timestamp(dt):
+    """Return a timestamp string formatted for 24-hour or 12-hour clock."""
+
+    if USE_24H_CLOCK:
+        # 24-hour.
+        return time.strftime("%Y-%m-%d %H:%M:%S", dt)
+    else:
+        # 12-hour AM/PM.
+        return time.strftime("%Y-%m-%d %I:%M:%S %p", dt)
 
 
 def fmt_duration(seconds: float) -> str:
@@ -142,7 +178,7 @@ def render_table():
 
     # Create the header panel.
     header_text = Text(
-        f"Started: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(program_state.start_time))}\n"
+        f"Started: {fmt_timestamp(time.localtime(program_state.start_time))}\n"
         f"Uptime: {fmt_duration(uptime)}\n"
         f"Debug Enabled: {debug_enabled()}\n"
         f"Total Downloaded: {total_gb} ({total_images} Images)\n"

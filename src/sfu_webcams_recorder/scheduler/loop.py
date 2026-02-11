@@ -2,14 +2,19 @@
 
 import time
 from threading import Thread
+import logging
 
 import requests
 
 from sfu_webcams_recorder.config.settings import (
     PICTURES_DIR,
     VIDEOS_DIR,
+    LOG_DIR,
+    SNAPSHOT_DIR,
     INTERVAL,
     DEBUG_VIDEO_CREATE,
+    DEBUG_SNAPSHOT_LOG,
+    DEBUG_SNAPSHOT_LOG_SECONDS,
 )
 from sfu_webcams_recorder.config.webcams import WEBCAM_URLS, WebcamID
 from sfu_webcams_recorder.io.webcam import (
@@ -24,7 +29,10 @@ from sfu_webcams_recorder.ui.state import (
     DownloadState,
     VideoState,
 )
-from sfu_webcams_recorder.ui.dashboard import ui_loop
+from sfu_webcams_recorder.ui.dashboard import ui_loop, save_dashboard_snapshot
+
+
+logger = logging.getLogger(__name__)
 
 
 def combine_day(day: str, cam_id: WebcamID):
@@ -129,10 +137,41 @@ def video_worker_loop():
         program_state.video_queue.task_done()
 
 
+def snapshot_loop():
+    """Save dashboard snapshot every hour on the hour."""
+    while True:
+        now = time.time()
+
+        # Seconds until next hour boundary if debug is not enabled.
+        sleep_time = (
+            DEBUG_SNAPSHOT_LOG_SECONDS
+            if DEBUG_SNAPSHOT_LOG
+            else 3600 - (int(now) % 3600)
+        )
+        time.sleep(sleep_time)
+
+        try:
+            save_dashboard_snapshot()
+        except OSError as e:
+            logger.exception("Snapshot failed: %s", e)
+
+
 def init_loop():
-    """Set up by creating needed directories."""
+    """Set up logging and needed directories."""
+    # For media.
     PICTURES_DIR.mkdir(parents=True, exist_ok=True)
     VIDEOS_DIR.mkdir(parents=True, exist_ok=True)
+
+    # For logging.
+    LOG_DIR.mkdir(exist_ok=True)
+    SNAPSHOT_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Set up logging.
+    logging.basicConfig(
+        filename=LOG_DIR / "log.log",
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(message)s",
+    )
 
 
 def run_loop():
@@ -140,8 +179,12 @@ def run_loop():
 
     init_loop()
 
+    logger.info("Program starting")
+
     # Start video worker.
     Thread(target=video_worker_loop, daemon=True).start()
+    # Start logging snapshots.
+    Thread(target=snapshot_loop, daemon=True).start()
 
     # Initialize state and start threads.
     for cam_id, url in WEBCAM_URLS.items():
@@ -155,3 +198,5 @@ def run_loop():
         ui_loop()
     except KeyboardInterrupt:
         pass
+    finally:
+        logger.info("Program shutting down")
