@@ -37,7 +37,7 @@ def render_table() -> Table:
             # Next download column.
             next_download = "-"
             remaining_interval_time = max(0, state.next_run_time - now)
-            next_download = "After Current" if remaining_interval_time == 0 else fmt_seconds(remaining_interval_time)
+            next_download = "After Current" if remaining_interval_time == 0 and state.download_state == DownloadState.DOWNLOADING else fmt_seconds(remaining_interval_time)
 
             # Video encoding column.
             if state.video_state == VideoState.ENCODING and state.video_create_start_time:
@@ -63,7 +63,7 @@ def render_table() -> Table:
 def ui_loop():
     """Continuously update the live Rich table."""
     
-    with Live(render_table(), refresh_per_second=10, screen=True) as live:
+    with Live(render_table(), refresh_per_second=20, screen=True) as live:
         while True:
-            time.sleep(0.1)
+            time.sleep(0.05)
             live.update(render_table())
