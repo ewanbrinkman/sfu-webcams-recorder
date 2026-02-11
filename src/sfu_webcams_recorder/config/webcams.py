@@ -5,7 +5,7 @@ from enum import StrEnum, auto
 
 class WebcamID(StrEnum):
     """The different webcams."""
-    
+
     AQN = auto()
     AQSW = auto()
     AQSE = auto()

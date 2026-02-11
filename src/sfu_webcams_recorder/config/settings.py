@@ -8,9 +8,12 @@ from pathlib import Path
 
 FPS = 60
 FFMPEG_CODEC_ARGS = [
-    "-c:v", "libx264",
-    "-preset", "slow",
-    "-crf", "23",
+    "-c:v",
+    "libx264",
+    "-preset",
+    "slow",
+    "-crf",
+    "23",
 ]
 
 # -----------------------------

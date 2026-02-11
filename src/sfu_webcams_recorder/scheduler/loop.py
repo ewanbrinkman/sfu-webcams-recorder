@@ -7,7 +7,10 @@ import requests
 
 from sfu_webcams_recorder.config.settings import PICTURES_DIR, VIDEOS_DIR, INTERVAL
 from sfu_webcams_recorder.config.webcams import WEBCAM_URLS, WebcamID
-from sfu_webcams_recorder.io.webcam import download_webcam_image, DuplicateWebcamImageError
+from sfu_webcams_recorder.io.webcam import (
+    download_webcam_image,
+    DuplicateWebcamImageError,
+)
 from sfu_webcams_recorder.io.video import create_daily_video
 from sfu_webcams_recorder.utils import day_folder_name
 from sfu_webcams_recorder.ui.state import (
@@ -15,7 +18,7 @@ from sfu_webcams_recorder.ui.state import (
     state_lock,
     WebcamState,
     DownloadState,
-    VideoState
+    VideoState,
 )
 from sfu_webcams_recorder.ui.dashboard import ui_loop
 
@@ -69,7 +72,9 @@ def webcam_loop(cam_id: WebcamID, url: str):
                 webcam_state[cam_id].error = None
         except (requests.RequestException, OSError, DuplicateWebcamImageError) as e:
             with state_lock:
-                webcam_state[cam_id].error = f"{type(e).__name__}: {str(e) if str(e) != 'None' else '(No Description)'}"
+                webcam_state[
+                    cam_id
+                ].error = f"{type(e).__name__}: {str(e) if str(e) != 'None' else '(No Description)'}"
 
         elapsed = time.time() - start
         with state_lock:
@@ -97,7 +102,7 @@ def init_loop():
 
 def run_loop():
     """Start webcam threads and run UI loop. The UI loop is blocking."""
-    
+
     init_loop()
 
     # Initialize state and start threads.

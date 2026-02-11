@@ -2,13 +2,20 @@
 
 Record the SFU webcams.
 
-## How To Run
+## Setup
 
 Run the following:
 
 1. Create a virtual environment: `uv venv`
 2. Install project and dependencies: `uv pip install -e .`
-3. Run the program: `uv run sfu-webcams-recorder`
+
+## How To Run
+
+After setup, run the following: `uv run sfu-webcams-recorder`
+
+## How To Format
+
+After setup, run the following: `uv run ruff format`
 
 ## Output
 

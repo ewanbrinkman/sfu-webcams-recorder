@@ -5,12 +5,17 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from sfu_webcams_recorder.config.settings import PICTURES_DIR, VIDEOS_DIR, FPS, FFMPEG_CODEC_ARGS
+from sfu_webcams_recorder.config.settings import (
+    PICTURES_DIR,
+    VIDEOS_DIR,
+    FPS,
+    FFMPEG_CODEC_ARGS,
+)
 
 
 def create_daily_video(code: str, day: str):
     """Create a daily video using all downloaded webcam images for a day."""
-    
+
     camdir = PICTURES_DIR / day / code
     imgs = sorted(camdir.glob("*.jpg"))
 
@@ -41,11 +46,15 @@ def create_daily_video(code: str, day: str):
         cmd = [
             "ffmpeg",
             "-hide_banner",
-            "-loglevel", "error",
+            "-loglevel",
+            "error",
             "-y",
-            "-framerate", str(FPS),
-            "-start_number", "1",
-            "-i", str(tmpdir / "%06d.jpg"),
+            "-framerate",
+            str(FPS),
+            "-start_number",
+            "1",
+            "-i",
+            str(tmpdir / "%06d.jpg"),
             *FFMPEG_CODEC_ARGS,
             str(tmp_out),
         ]
@@ -54,7 +63,7 @@ def create_daily_video(code: str, day: str):
             subprocess.run(cmd, check=True)
         except subprocess.CalledProcessError:
             return
-        
+
         if tmp_out.exists():
             tmp_out.rename(outfile)
             shutil.rmtree(camdir)

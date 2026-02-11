@@ -10,10 +10,11 @@ from rich.align import Align
 from rich.text import Text
 
 from sfu_webcams_recorder.ui.state import (
-    webcam_state, state_lock,
+    webcam_state,
+    state_lock,
     DownloadState,
     VideoState,
-    program_start_time
+    program_start_time,
 )
 from sfu_webcams_recorder.utils import debug_enabled
 
@@ -57,25 +58,40 @@ def render_table():
     with state_lock:
         for cam_id, state in webcam_state.items():
             # Downloader column: show elapsed time if downloading, else state name.
-            if state.download_state == DownloadState.DOWNLOADING and state.download_start_time:
+            if (
+                state.download_state == DownloadState.DOWNLOADING
+                and state.download_start_time
+            ):
                 downloader = fmt_seconds(now - state.download_start_time)
             else:
                 downloader = state.download_state.name.title()
-                
+
             # Last download column.
-            last_download = fmt_seconds(state.last_download_elapsed_time) if state.last_download_elapsed_time is not None else "-"
-                
+            last_download = (
+                fmt_seconds(state.last_download_elapsed_time)
+                if state.last_download_elapsed_time is not None
+                else "-"
+            )
+
             # Next download column.
             next_download = "-"
             remaining_interval_time = max(0, state.next_run_time - now)
-            next_download = "After Current" if remaining_interval_time == 0 and state.download_state == DownloadState.DOWNLOADING else fmt_seconds(remaining_interval_time)
+            next_download = (
+                "After Current"
+                if remaining_interval_time == 0
+                and state.download_state == DownloadState.DOWNLOADING
+                else fmt_seconds(remaining_interval_time)
+            )
 
             # Video encoding column.
-            if state.video_state == VideoState.ENCODING and state.video_create_start_time:
+            if (
+                state.video_state == VideoState.ENCODING
+                and state.video_create_start_time
+            ):
                 encode_time = fmt_seconds(now - state.video_create_start_time)
             else:
                 encode_time = state.video_state.name.title()
-            
+
             # Error column.
             error = state.error if state.error is not None else "-"
 
@@ -90,14 +106,15 @@ def render_table():
 
     # Header panel
     uptime = time.time() - program_start_time
-    
+
     console = Console()
     table_width = console.measure(table).maximum
 
     header_text = Text(
         f"Started: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(program_start_time))}\n"
         f"Uptime: {fmt_duration(uptime)}\n"
-        f"Debug Enabled: {debug_enabled()}")
+        f"Debug Enabled: {debug_enabled()}"
+    )
     header = Panel(
         header_text,
         title="SFU Webcams Recorder",
@@ -109,7 +126,7 @@ def render_table():
 
 def ui_loop():
     """Continuously update the live Rich table."""
-    
+
     with Live(render_table(), refresh_per_second=10, screen=True) as live:
         while True:
             time.sleep(0.1)

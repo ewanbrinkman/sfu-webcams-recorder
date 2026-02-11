@@ -11,7 +11,7 @@ from sfu_webcams_recorder.utils import day_folder_name, now
 from sfu_webcams_recorder.config.settings import (
     PICTURES_DIR,
     DOWNLOAD_TIMEOUT_SECONDS,
-    DEBUG_DOWNLOAD_DELAY
+    DEBUG_DOWNLOAD_DELAY,
 )
 
 
@@ -32,14 +32,14 @@ def iso_filename_section():
 
 def md5sum(path: Path) -> str:
     """Compute the md5sum of a file."""
-    
+
     with path.open("rb") as f:
         return hashlib.file_digest(f, "md5").hexdigest()
 
 
 def download_webcam_image(code: str, url: str) -> Path:
     """Download a webcam image."""
-    
+
     day = day_folder_name()
     camdir = PICTURES_DIR / day / code
     camdir.mkdir(parents=True, exist_ok=True)
