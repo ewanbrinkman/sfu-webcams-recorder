@@ -4,8 +4,12 @@ import requests
 import time
 import random
 
-from ..utils import iso_filename_section, day_folder_name
+from ..utils import day_folder_name, now
 from ..config.settings import PICTURES_DIR, DOWNLOAD_TIMEOUT_SECONDS, DEBUG_DOWNLOAD_DELAY
+
+
+def iso_filename_section():
+    return now().strftime("%Y%m%dT%H%M%S")
 
 
 def md5sum(path: Path) -> str:

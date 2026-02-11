@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from enum import StrEnum, auto
+import time
 from threading import Lock
 
 from ..config.webcams import CameraID
@@ -29,6 +30,8 @@ class CameraState:
 
 # Shared state dictionary for all cameras, keyed by `CameraID`.
 camera_state: dict[CameraID, CameraState] = {}
+# Other state.
+program_start_time = time.time()
 
 # Lock to protect access to `camera_state` from multiple threads.
 state_lock = Lock()

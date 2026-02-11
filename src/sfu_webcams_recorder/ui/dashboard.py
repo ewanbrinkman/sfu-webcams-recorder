@@ -63,7 +63,7 @@ def render_table() -> Table:
 def ui_loop():
     """Continuously update the live Rich table."""
     
-    with Live(render_table(), refresh_per_second=20, screen=True) as live:
+    with Live(render_table(), refresh_per_second=10, screen=True) as live:
         while True:
-            time.sleep(0.05)
+            time.sleep(0.1)
             live.update(render_table())
