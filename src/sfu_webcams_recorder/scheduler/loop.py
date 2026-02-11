@@ -1,27 +1,30 @@
 import time
 from threading import Thread
 
-from ..config import PICTURES_DIR, VIDEOS_DIR, CAMERAS, INTERVAL
-from ..downloader.image import download_image
-from ..video.create_daily_video import create_daily_video
+from ..config.settings import PICTURES_DIR, VIDEOS_DIR, INTERVAL
+from ..config.webcams import CAMERA_URLS, CameraID
+from ..io.webcam import download_webcam_image
+from ..io.video import create_daily_video
 from ..utils import day_folder_name
-from ..ui.state import camera_state, state_lock
+from ..ui.state import camera_state, state_lock, CameraState, DownloadState, VideoState
 from ..ui.dashboard import ui_loop
 
 
-def combine_day(day: str, code: str):
+def combine_day(day: str, cam_id: CameraID):
     """Create daily videos and update UI state."""
 
     with state_lock:
-        camera_state[code]["video_start_time"] = time.time()
+        camera_state[cam_id].video_create_start_time = time.time()
+        camera_state[cam_id].video_state = VideoState.ENCODING
 
     try:
-        create_daily_video(code, day)
+        create_daily_video(cam_id.name.lower(), day)
     finally:
         with state_lock:
-            camera_state[code]["video_start_time"] = None
+            camera_state[cam_id].video_create_start_time = None
+            camera_state[cam_id].video_state = VideoState.IDLE
 
-    # cleanup empty day folder
+    # Cleanup empty day folder.
     day_path = PICTURES_DIR / day
     try:
         if day_path.exists() and not any(day_path.iterdir()):
@@ -30,53 +33,46 @@ def combine_day(day: str, code: str):
         pass
 
 
-def camera_loop(code: str, url: str):
-
+def camera_loop(cam_id: CameraID, url: str):
     next_run = time.time()
     current_day = day_folder_name()
 
     while True:
         now = time.time()
 
-        # sleeping phase
+        # Sleeping phase.
         if now < next_run:
             with state_lock:
-                camera_state[code]["status"] = "Sleeping"
+                camera_state[cam_id].download_state = DownloadState.SLEEPING
             time.sleep(next_run - now)
 
-        # downloading phase
+        # Downloading phase.
         start = time.time()
         with state_lock:
-            camera_state[code]["status"] = "Downloading"
-            camera_state[code]['download_start_time'] = start
-            camera_state[code]["next_run"] = start + INTERVAL
+            camera_state[cam_id].download_state = DownloadState.DOWNLOADING
+            camera_state[cam_id].download_start_time = start
+            camera_state[cam_id].next_run_time = start + INTERVAL
 
         try:
-            download_image(code, url)
-            # raise TabError
+            download_webcam_image(cam_id.name.lower(), url)
             with state_lock:
-                camera_state[code]["error"] = None
+                camera_state[cam_id].error = None
         except Exception as e:
             with state_lock:
-                camera_state[code]["error"] = f"{type(e).__name__}: {str(e) if str(e) != "None" else "(No Description)"}"
+                camera_state[cam_id].error = f"{type(e).__name__}: {str(e) if str(e) != 'None' else '(No Description)'}"
 
         elapsed = time.time() - start
-
         with state_lock:
-            camera_state[code]["last_elapsed"] = elapsed
-            camera_state[code]['download_start_time'] = None
+            camera_state[cam_id].last_download_elapsed_time = elapsed
+            camera_state[cam_id].download_start_time = None
 
-        # detect new day
+        # Detect new day.
         updated_day = day_folder_name()
         if updated_day != current_day:
-            Thread(
-                target=combine_day,
-                args=(current_day, code),
-                daemon=True,
-            ).start()
+            Thread(target=combine_day, args=(current_day, cam_id), daemon=True).start()
             current_day = updated_day
 
-        # schedule next run
+        # Schedule next run.
         now = time.time()
         if elapsed > INTERVAL:
             next_run = now
@@ -90,21 +86,19 @@ def init_loop():
 
 
 def run_loop():
+    """Start camera threads and run UI loop. The UI loop is blocking."""
+    
     init_loop()
 
-    # initialize state + threads
-    for code, url in CAMERAS.items():
+    # Initialize state and start threads.
+    for cam_id, url in CAMERA_URLS.items():
         with state_lock:
-            camera_state[code] = {
-                "status": "Starting",
-                "download_start_time": None,
-                "last_elapsed": None,
-                "next_run": None,
-                "video_start_time": None,
-                "error": None,
-            }
+            camera_state[cam_id] = CameraState()
 
-        Thread(target=camera_loop, args=(code, url), daemon=True).start()
+        Thread(target=camera_loop, args=(cam_id, url), daemon=True).start()
 
-    # UI loop (blocking)
-    ui_loop()
+    # UI loop (blocking).
+    try:
+        ui_loop()
+    except KeyboardInterrupt:
+        pass

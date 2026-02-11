@@ -1,7 +1,7 @@
 import datetime
 import pytz
 
-from .config import LOG_USE_24H
+from .config.settings import LOG_USE_24H
 
 TZ = pytz.timezone("America/Vancouver")
 
@@ -24,4 +24,4 @@ def iso_filename_section():
 
 def day_folder_name(dt=None):
     dt = dt or now()
-    return f"{dt.year}-{dt.month}-{dt.day}-{dt.strftime('%a').lower()[:3]}"
+    return f"{dt.year}-{dt.month}-{dt.day}-{dt.strftime("%a").lower()[:3]}"

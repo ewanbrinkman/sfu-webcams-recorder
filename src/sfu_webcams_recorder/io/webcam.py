@@ -5,15 +5,19 @@ import time
 import random
 
 from ..utils import iso_filename_section, day_folder_name
-from ..config import PICTURES_DIR, DOWNLOAD_TIMEOUT_SECONDS, DEBUG_DOWNLOAD_DELAY
+from ..config.settings import PICTURES_DIR, DOWNLOAD_TIMEOUT_SECONDS, DEBUG_DOWNLOAD_DELAY
 
 
 def md5sum(path: Path) -> str:
+    """Compute the md5sum of a file."""
+    
     with path.open("rb") as f:
         return hashlib.file_digest(f, "md5").hexdigest()
 
 
-def download_image(code: str, url: str) -> Path | None:
+def download_webcam_image(code: str, url: str) -> Path | None:
+    """Download a webcam image."""
+    
     day = day_folder_name()
     camdir = PICTURES_DIR / day / code
     camdir.mkdir(parents=True, exist_ok=True)

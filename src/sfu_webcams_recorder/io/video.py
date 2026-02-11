@@ -3,10 +3,12 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from ..config import PICTURES_DIR, VIDEOS_DIR, FPS, FFMPEG_CODEC_ARGS
+from ..config.settings import PICTURES_DIR, VIDEOS_DIR, FPS, FFMPEG_CODEC_ARGS
 
 
 def create_daily_video(code: str, day: str):
+    """Create a daily video using all downloaded webcam images for a day."""
+    
     camdir = PICTURES_DIR / day / code
     imgs = sorted(camdir.glob("*.jpg"))
 
