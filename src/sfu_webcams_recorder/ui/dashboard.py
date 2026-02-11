@@ -1,3 +1,5 @@
+"""The visual dashboard displaying status information of the program."""
+
 import time
 from rich.live import Live
 from rich.table import Table
@@ -7,7 +9,13 @@ from rich.console import Group, Console
 from rich.align import Align
 from rich.text import Text
 
-from .state import webcam_state, state_lock, DownloadState, VideoState, program_start_time
+from sfu_webcams_recorder.ui.state import (
+    webcam_state, state_lock,
+    DownloadState,
+    VideoState,
+    program_start_time
+)
+from sfu_webcams_recorder.utils import debug_enabled
 
 
 def fmt_seconds(value: float):
@@ -88,7 +96,8 @@ def render_table():
 
     header_text = Text(
         f"Started: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(program_start_time))}\n"
-        f"Uptime: {fmt_duration(uptime)}")
+        f"Uptime: {fmt_duration(uptime)}\n"
+        f"Debug Enabled: {debug_enabled()}")
     header = Panel(
         header_text,
         title="SFU Webcams Recorder",

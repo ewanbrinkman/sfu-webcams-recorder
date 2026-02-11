@@ -1,13 +1,23 @@
+"""The main program loops."""
+
 import time
 from threading import Thread
 
-from ..config.settings import PICTURES_DIR, VIDEOS_DIR, INTERVAL
-from ..config.webcams import WEBCAM_URLS, WebcamID
-from ..io.webcam import download_webcam_image
-from ..io.video import create_daily_video
-from ..utils import day_folder_name
-from ..ui.state import webcam_state, state_lock, WebcamState, DownloadState, VideoState
-from ..ui.dashboard import ui_loop
+import requests
+
+from sfu_webcams_recorder.config.settings import PICTURES_DIR, VIDEOS_DIR, INTERVAL
+from sfu_webcams_recorder.config.webcams import WEBCAM_URLS, WebcamID
+from sfu_webcams_recorder.io.webcam import download_webcam_image, DuplicateWebcamImageError
+from sfu_webcams_recorder.io.video import create_daily_video
+from sfu_webcams_recorder.utils import day_folder_name
+from sfu_webcams_recorder.ui.state import (
+    webcam_state,
+    state_lock,
+    WebcamState,
+    DownloadState,
+    VideoState
+)
+from sfu_webcams_recorder.ui.dashboard import ui_loop
 
 
 def combine_day(day: str, cam_id: WebcamID):
@@ -57,7 +67,7 @@ def webcam_loop(cam_id: WebcamID, url: str):
             download_webcam_image(cam_id.name.lower(), url)
             with state_lock:
                 webcam_state[cam_id].error = None
-        except Exception as e:
+        except (requests.RequestException, OSError, DuplicateWebcamImageError) as e:
             with state_lock:
                 webcam_state[cam_id].error = f"{type(e).__name__}: {str(e) if str(e) != 'None' else '(No Description)'}"
 

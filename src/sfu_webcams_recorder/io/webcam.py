@@ -1,14 +1,32 @@
+"""Download webcam images."""
+
 import hashlib
 from pathlib import Path
-import requests
 import time
 import random
 
-from ..utils import day_folder_name, now
-from ..config.settings import PICTURES_DIR, DOWNLOAD_TIMEOUT_SECONDS, DEBUG_DOWNLOAD_DELAY
+import requests
+
+from sfu_webcams_recorder.utils import day_folder_name, now
+from sfu_webcams_recorder.config.settings import (
+    PICTURES_DIR,
+    DOWNLOAD_TIMEOUT_SECONDS,
+    DEBUG_DOWNLOAD_DELAY
+)
+
+
+class DuplicateWebcamImageError(Exception):
+    """Raised when a downloaded webcam image is identical to the previous one."""
+
+    def __init__(self, new_file: Path, old_file: Path):
+        self.new_file = new_file
+        self.old_file = old_file
+
+        super().__init__("Downloaded image is identical to previous")
 
 
 def iso_filename_section():
+    """Used to add the timestamp to a downloaded webcam image."""
     return now().strftime("%Y%m%dT%H%M%S")
 
 
@@ -19,7 +37,7 @@ def md5sum(path: Path) -> str:
         return hashlib.file_digest(f, "md5").hexdigest()
 
 
-def download_webcam_image(code: str, url: str) -> Path | None:
+def download_webcam_image(code: str, url: str) -> Path:
     """Download a webcam image."""
     
     day = day_folder_name()
@@ -34,10 +52,10 @@ def download_webcam_image(code: str, url: str) -> Path | None:
             time.sleep(random.uniform(1, 30))
         r.raise_for_status()
         outfile.write_bytes(r.content)
-    except Exception:
+    except (requests.RequestException, OSError):
         if outfile.exists():
             outfile.unlink()
-        return None
+        raise
 
     files = sorted(camdir.glob("*.jpg"), key=lambda p: p.stat().st_mtime, reverse=True)
 
@@ -45,6 +63,6 @@ def download_webcam_image(code: str, url: str) -> Path | None:
         last_file = files[1]
         if md5sum(last_file) == md5sum(outfile):
             outfile.unlink()
-            return None
+            raise DuplicateWebcamImageError(outfile, last_file)
 
     return outfile

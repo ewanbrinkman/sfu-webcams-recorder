@@ -1,3 +1,5 @@
+"""General config."""
+
 from pathlib import Path
 
 # -----------------------------
@@ -32,4 +34,4 @@ VIDEOS_DIR = BASE_DIR / "videos"
 
 DEBUG_VIDEO_CREATE = False
 DEBUG_VIDEO_CREATE_SLEEP_SECONDS = 33
-DEBUG_DOWNLOAD_DELAY = True
+DEBUG_DOWNLOAD_DELAY = False
