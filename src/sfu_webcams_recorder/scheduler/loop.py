@@ -97,7 +97,11 @@ def webcam_loop(cam_id: WebcamID, url: str):
         if updated_day != current_day or (
             not debug_video_create_triggered and DEBUG_VIDEO_CREATE
         ):
-            Thread(target=combine_day, args=(current_day, cam_id), daemon=True).start()
+            # Add job to queue and notify worker
+            with program_state.video_condition:
+                program_state.video_queue.put((current_day, cam_id))
+                program_state.video_condition.notify()
+
             current_day = updated_day
 
             debug_video_create_triggered = True
@@ -110,6 +114,21 @@ def webcam_loop(cam_id: WebcamID, url: str):
             next_run += INTERVAL
 
 
+def video_worker_loop():
+    """Worker that processes video creation jobs one at a time."""
+    while True:
+        with program_state.video_condition:
+            while program_state.video_queue.empty():
+                # Wait until a job is added.
+                program_state.video_condition.wait()
+
+            day, cam_id = program_state.video_queue.get()
+
+        # Update UI and run encode.
+        combine_day(day, cam_id)
+        program_state.video_queue.task_done()
+
+
 def init_loop():
     """Set up by creating needed directories."""
     PICTURES_DIR.mkdir(parents=True, exist_ok=True)
@@ -120,6 +139,9 @@ def run_loop():
     """Start webcam threads and run UI loop. The UI loop is blocking."""
 
     init_loop()
+
+    # Start video worker.
+    Thread(target=video_worker_loop, daemon=True).start()
 
     # Initialize state and start threads.
     for cam_id, url in WEBCAM_URLS.items():

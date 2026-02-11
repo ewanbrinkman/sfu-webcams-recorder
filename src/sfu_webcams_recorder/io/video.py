@@ -1,5 +1,6 @@
 """Create a daily video of all the webcam images."""
 
+import time
 import shutil
 import subprocess
 import tempfile
@@ -10,11 +11,16 @@ from sfu_webcams_recorder.config.settings import (
     VIDEOS_DIR,
     FPS,
     FFMPEG_CODEC_ARGS,
+    DEBUG_VIDEO_CREATE_SLEEP,
+    DEBUG_VIDEO_CREATE_SLEEP_SECONDS,
 )
 
 
 def create_daily_video(code: str, day: str):
     """Create a daily video using all downloaded webcam images for a day."""
+
+    if DEBUG_VIDEO_CREATE_SLEEP:
+        time.sleep(DEBUG_VIDEO_CREATE_SLEEP_SECONDS)
 
     camdir = PICTURES_DIR / day / code
     imgs = sorted(camdir.glob("*.jpg"))

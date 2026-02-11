@@ -100,12 +100,20 @@ def render_table():
             )
 
             # Video encoding column.
+            queue_list = list(program_state.video_queue.queue)
+            total_in_queue = len(queue_list)
             if (
                 state.video_state == VideoState.ENCODING
                 and state.video_create_start_time
             ):
+                # Currently processing.
                 encode_time = fmt_seconds(now - state.video_create_start_time)
+            elif cam_id in [job[1] for job in queue_list]:
+                # Waiting in queue.
+                position = [job[1] for job in queue_list].index(cam_id) + 1
+                encode_time = f"In Queue ({position}/{total_in_queue})"
             else:
+                # Nothing happening
                 encode_time = state.video_state.name.title()
 
             # Error column.

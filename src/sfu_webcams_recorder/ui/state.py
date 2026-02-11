@@ -3,7 +3,8 @@
 from dataclasses import dataclass, field
 from enum import StrEnum, auto
 import time
-from threading import Lock
+from threading import Lock, Condition
+from queue import Queue
 
 from sfu_webcams_recorder.config.webcams import WebcamID
 
@@ -40,10 +41,19 @@ class WebcamState:
 class ProgramState:
     """Shared program-wide state."""
 
+    # State for each webcam thread.
     webcam_state: dict[WebcamID, WebcamState] = field(default_factory=dict)
+
+    # State for UI panel information.
     start_time: float = field(default_factory=time.time)
     total_downloaded_bytes: int = 0
     total_downloaded_images: int = 0
+
+    # Video worker queue and condition.
+    video_queue: Queue = field(default_factory=Queue)
+    video_condition: Condition = field(default_factory=Condition)
+
+    # The program lock.
     lock: Lock = field(default_factory=Lock)
 
 

@@ -5,6 +5,7 @@ import pytz
 
 from sfu_webcams_recorder.config.settings import (
     DEBUG_VIDEO_CREATE,
+    DEBUG_VIDEO_CREATE_SLEEP,
     DEBUG_DOWNLOAD_DELAY,
 )
 
@@ -25,4 +26,4 @@ def day_folder_name(dt=None):
 
 def debug_enabled():
     """Check if any debug option is enabled."""
-    return DEBUG_VIDEO_CREATE or DEBUG_DOWNLOAD_DELAY
+    return DEBUG_VIDEO_CREATE or DEBUG_VIDEO_CREATE_SLEEP or DEBUG_DOWNLOAD_DELAY
