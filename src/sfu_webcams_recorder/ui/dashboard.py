@@ -7,7 +7,7 @@ from rich.console import Group, Console
 from rich.align import Align
 from rich.text import Text
 
-from .state import camera_state, state_lock, DownloadState, VideoState, program_start_time
+from .state import webcam_state, state_lock, DownloadState, VideoState, program_start_time
 
 
 def fmt_seconds(value: float):
@@ -37,7 +37,7 @@ def fmt_duration(seconds: float) -> str:
 def render_table():
     table = Table(box=box.SIMPLE)
 
-    table.add_column("Camera")
+    table.add_column("Webcam")
     table.add_column("Downloader")
     table.add_column("Last Download")
     table.add_column("Next Download Start")
@@ -47,7 +47,7 @@ def render_table():
     now = time.time()
 
     with state_lock:
-        for cam_id, state in camera_state.items():
+        for cam_id, state in webcam_state.items():
             # Downloader column: show elapsed time if downloading, else state name.
             if state.download_state == DownloadState.DOWNLOADING and state.download_start_time:
                 downloader = fmt_seconds(now - state.download_start_time)

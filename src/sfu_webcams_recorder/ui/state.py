@@ -3,7 +3,7 @@ from enum import StrEnum, auto
 import time
 from threading import Lock
 
-from ..config.webcams import CameraID
+from ..config.webcams import WebcamID
 
 
 class DownloadState(StrEnum):
@@ -18,7 +18,7 @@ class VideoState(StrEnum):
 
 
 @dataclass(slots=True)
-class CameraState:
+class WebcamState:
     download_state: DownloadState = DownloadState.STARTING
     video_state: VideoState = VideoState.IDLE
     download_start_time: float | None = None
@@ -28,10 +28,10 @@ class CameraState:
     error: str | None = None
 
 
-# Shared state dictionary for all cameras, keyed by `CameraID`.
-camera_state: dict[CameraID, CameraState] = {}
+# Shared state dictionary for all webcams, keyed by `WebcamID`.
+webcam_state: dict[WebcamID, WebcamState] = {}
 # Other state.
 program_start_time = time.time()
 
-# Lock to protect access to `camera_state` from multiple threads.
+# Lock to protect access to `webcam_state` from multiple threads.
 state_lock = Lock()

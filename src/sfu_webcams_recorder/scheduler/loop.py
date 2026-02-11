@@ -2,27 +2,27 @@ import time
 from threading import Thread
 
 from ..config.settings import PICTURES_DIR, VIDEOS_DIR, INTERVAL
-from ..config.webcams import CAMERA_URLS, CameraID
+from ..config.webcams import WEBCAM_URLS, WebcamID
 from ..io.webcam import download_webcam_image
 from ..io.video import create_daily_video
 from ..utils import day_folder_name
-from ..ui.state import camera_state, state_lock, CameraState, DownloadState, VideoState
+from ..ui.state import webcam_state, state_lock, WebcamState, DownloadState, VideoState
 from ..ui.dashboard import ui_loop
 
 
-def combine_day(day: str, cam_id: CameraID):
+def combine_day(day: str, cam_id: WebcamID):
     """Create daily videos and update UI state."""
 
     with state_lock:
-        camera_state[cam_id].video_create_start_time = time.time()
-        camera_state[cam_id].video_state = VideoState.ENCODING
+        webcam_state[cam_id].video_create_start_time = time.time()
+        webcam_state[cam_id].video_state = VideoState.ENCODING
 
     try:
         create_daily_video(cam_id.name.lower(), day)
     finally:
         with state_lock:
-            camera_state[cam_id].video_create_start_time = None
-            camera_state[cam_id].video_state = VideoState.IDLE
+            webcam_state[cam_id].video_create_start_time = None
+            webcam_state[cam_id].video_state = VideoState.IDLE
 
     # Cleanup empty day folder.
     day_path = PICTURES_DIR / day
@@ -33,7 +33,7 @@ def combine_day(day: str, cam_id: CameraID):
         pass
 
 
-def camera_loop(cam_id: CameraID, url: str):
+def webcam_loop(cam_id: WebcamID, url: str):
     next_run = time.time()
     current_day = day_folder_name()
 
@@ -43,28 +43,28 @@ def camera_loop(cam_id: CameraID, url: str):
         # Sleeping phase.
         if now < next_run:
             with state_lock:
-                camera_state[cam_id].download_state = DownloadState.SLEEPING
+                webcam_state[cam_id].download_state = DownloadState.SLEEPING
             time.sleep(next_run - now)
 
         # Downloading phase.
         start = time.time()
         with state_lock:
-            camera_state[cam_id].download_state = DownloadState.DOWNLOADING
-            camera_state[cam_id].download_start_time = start
-            camera_state[cam_id].next_run_time = start + INTERVAL
+            webcam_state[cam_id].download_state = DownloadState.DOWNLOADING
+            webcam_state[cam_id].download_start_time = start
+            webcam_state[cam_id].next_run_time = start + INTERVAL
 
         try:
             download_webcam_image(cam_id.name.lower(), url)
             with state_lock:
-                camera_state[cam_id].error = None
+                webcam_state[cam_id].error = None
         except Exception as e:
             with state_lock:
-                camera_state[cam_id].error = f"{type(e).__name__}: {str(e) if str(e) != 'None' else '(No Description)'}"
+                webcam_state[cam_id].error = f"{type(e).__name__}: {str(e) if str(e) != 'None' else '(No Description)'}"
 
         elapsed = time.time() - start
         with state_lock:
-            camera_state[cam_id].last_download_elapsed_time = elapsed
-            camera_state[cam_id].download_start_time = None
+            webcam_state[cam_id].last_download_elapsed_time = elapsed
+            webcam_state[cam_id].download_start_time = None
 
         # Detect new day.
         updated_day = day_folder_name()
@@ -86,16 +86,16 @@ def init_loop():
 
 
 def run_loop():
-    """Start camera threads and run UI loop. The UI loop is blocking."""
+    """Start webcam threads and run UI loop. The UI loop is blocking."""
     
     init_loop()
 
     # Initialize state and start threads.
-    for cam_id, url in CAMERA_URLS.items():
+    for cam_id, url in WEBCAM_URLS.items():
         with state_lock:
-            camera_state[cam_id] = CameraState()
+            webcam_state[cam_id] = WebcamState()
 
-        Thread(target=camera_loop, args=(cam_id, url), daemon=True).start()
+        Thread(target=webcam_loop, args=(cam_id, url), daemon=True).start()
 
     # UI loop (blocking).
     try:
