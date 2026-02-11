@@ -43,6 +43,7 @@ class ProgramState:
     webcam_state: dict[WebcamID, WebcamState] = field(default_factory=dict)
     start_time: float = field(default_factory=time.time)
     total_downloaded_bytes: int = 0
+    total_downloaded_images: int = 0
     lock: Lock = field(default_factory=Lock)
 
 

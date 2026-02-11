@@ -17,6 +17,23 @@ from sfu_webcams_recorder.ui.state import (
 from sfu_webcams_recorder.utils import debug_enabled
 
 
+def format_bytes(size_bytes: int) -> str:
+    """Format bytes to be in GB."""
+    return f"{size_bytes / (1024**3):.2f} GB"
+
+
+def gb_per_day() -> str:
+    """Calculate GB per day downloaded."""
+    now = time.time()
+    with program_state.lock:
+        total_bytes = program_state.total_downloaded_bytes
+        elapsed_seconds = max(
+            1, now - program_state.start_time
+        )  # Avoid divide by zero.
+    days = elapsed_seconds / 86400
+    return f"{format_bytes(total_bytes / days)}/day"
+
+
 def fmt_seconds(value: float):
     """Format seconds as 1 decimal place, or '-' if None or 0."""
     return f"{value:.1f}s"
@@ -47,7 +64,7 @@ def render_table():
 
     table.add_column("Webcam")
     table.add_column("Downloader")
-    table.add_column("Last Download")
+    table.add_column("Last Download Elapsed")
     table.add_column("Next Download Start")
     table.add_column("Video Encoding")
     table.add_column("Error")
@@ -103,16 +120,25 @@ def render_table():
                 error,
             )
 
-    # Header panel
+    # Calculate values for the header panel.
     uptime = time.time() - program_state.start_time
 
+    with program_state.lock:
+        total_images = program_state.total_downloaded_images
+        total_gb = format_bytes(program_state.total_downloaded_bytes)
+    download_rate = gb_per_day()
+
+    # Calculate table width.
     console = Console()
     table_width = console.measure(table).maximum
 
+    # Create the header panel.
     header_text = Text(
         f"Started: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(program_state.start_time))}\n"
         f"Uptime: {fmt_duration(uptime)}\n"
-        f"Debug Enabled: {debug_enabled()}"
+        f"Debug Enabled: {debug_enabled()}\n"
+        f"Total Downloaded: {total_gb} ({total_images} Images)\n"
+        f"Download Rate: {download_rate}"
     )
     header = Panel(
         header_text,

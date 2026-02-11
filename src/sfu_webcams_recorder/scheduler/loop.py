@@ -5,7 +5,12 @@ from threading import Thread
 
 import requests
 
-from sfu_webcams_recorder.config.settings import PICTURES_DIR, VIDEOS_DIR, INTERVAL
+from sfu_webcams_recorder.config.settings import (
+    PICTURES_DIR,
+    VIDEOS_DIR,
+    INTERVAL,
+    DEBUG_VIDEO_CREATE,
+)
 from sfu_webcams_recorder.config.webcams import WEBCAM_URLS, WebcamID
 from sfu_webcams_recorder.io.webcam import (
     download_webcam_image,
@@ -46,8 +51,11 @@ def combine_day(day: str, cam_id: WebcamID):
 
 
 def webcam_loop(cam_id: WebcamID, url: str):
+    """The main loop for each webcam."""
     next_run = time.time()
     current_day = day_folder_name()
+
+    debug_video_create_triggered = False
 
     while True:
         now = time.time()
@@ -86,9 +94,13 @@ def webcam_loop(cam_id: WebcamID, url: str):
 
         # Detect new day.
         updated_day = day_folder_name()
-        if updated_day != current_day:
+        if updated_day != current_day or (
+            not debug_video_create_triggered and DEBUG_VIDEO_CREATE
+        ):
             Thread(target=combine_day, args=(current_day, cam_id), daemon=True).start()
             current_day = updated_day
+
+            debug_video_create_triggered = True
 
         # Schedule next run.
         now = time.time()
@@ -99,6 +111,7 @@ def webcam_loop(cam_id: WebcamID, url: str):
 
 
 def init_loop():
+    """Set up by creating needed directories."""
     PICTURES_DIR.mkdir(parents=True, exist_ok=True)
     VIDEOS_DIR.mkdir(parents=True, exist_ok=True)
 

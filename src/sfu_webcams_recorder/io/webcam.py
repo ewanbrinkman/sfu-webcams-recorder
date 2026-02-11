@@ -55,6 +55,7 @@ def download_webcam_image(code: str, url: str) -> Path:
         outfile.write_bytes(r.content)
         with program_state.lock:
             program_state.total_downloaded_bytes += len(r.content)
+            program_state.total_downloaded_images += 1
     except (requests.RequestException, OSError):
         if outfile.exists():
             outfile.unlink()
