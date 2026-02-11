@@ -2,8 +2,12 @@ import time
 from rich.live import Live
 from rich.table import Table
 from rich import box
+from rich.panel import Panel
+from rich.console import Group, Console
+from rich.align import Align
+from rich.text import Text
 
-from .state import camera_state, state_lock, CameraState, DownloadState, VideoState, CameraID
+from .state import camera_state, state_lock, DownloadState, VideoState, program_start_time
 
 
 def fmt_seconds(value: float):
@@ -11,8 +15,27 @@ def fmt_seconds(value: float):
     return f"{value:.1f}s"
 
 
-def render_table() -> Table:
-    table = Table(title="Webcam Recorder", box=box.SIMPLE)
+def fmt_duration(seconds: float) -> str:
+    """Format duration for how long the program has been running."""
+    seconds = int(seconds)
+    days, seconds = divmod(seconds, 86400)
+    hours, seconds = divmod(seconds, 3600)
+    minutes, seconds = divmod(seconds, 60)
+
+    parts = []
+    if days:
+        parts.append(f"{days}d")
+    if days or hours:
+        parts.append(f"{hours}h")
+    if days or hours or minutes:
+        parts.append(f"{minutes}m")
+    parts.append(f"{seconds}s")
+
+    return " ".join(parts)
+
+
+def render_table():
+    table = Table(box=box.SIMPLE)
 
     table.add_column("Camera")
     table.add_column("Downloader")
@@ -57,7 +80,22 @@ def render_table() -> Table:
                 error,
             )
 
-    return table
+    # Header panel
+    uptime = time.time() - program_start_time
+    
+    console = Console()
+    table_width = console.measure(table).maximum
+
+    header_text = Text(
+        f"Started: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(program_start_time))}\n"
+        f"Uptime: {fmt_duration(uptime)}")
+    header = Panel(
+        header_text,
+        title="SFU Webcams Recorder",
+        width=table_width,
+    )
+
+    return Align.center(Group(header, table))
 
 
 def ui_loop():
