@@ -38,4 +38,4 @@ DEBUG_DOWNLOAD_DELAY = True
 # Logging
 # -----------------------------
 
-LOG_USE_24H = False
+USE_24H = False

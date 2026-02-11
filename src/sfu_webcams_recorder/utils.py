@@ -1,7 +1,7 @@
 import datetime
 import pytz
 
-from .config.settings import LOG_USE_24H
+from .config.settings import USE_24H
 
 TZ = pytz.timezone("America/Vancouver")
 
@@ -12,7 +12,7 @@ def now():
 
 def timestamp_str():
     dt = now()
-    if LOG_USE_24H:
+    if USE_24H:
         return dt.strftime("%Y-%m-%d %H:%M:%S")
     else:
         return dt.strftime("%Y-%m-%d %I:%M:%S %p")
