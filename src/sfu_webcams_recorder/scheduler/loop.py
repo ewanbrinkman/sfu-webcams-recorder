@@ -3,6 +3,7 @@
 import time
 from threading import Thread
 import logging
+import subprocess
 
 import requests
 
@@ -21,7 +22,7 @@ from sfu_webcams_recorder.io.webcam import (
     download_webcam_image,
     DuplicateWebcamImageError,
 )
-from sfu_webcams_recorder.io.video import create_daily_video
+from sfu_webcams_recorder.io.video import VideoCreationError, create_daily_video
 from sfu_webcams_recorder.utils import day_folder_name
 from sfu_webcams_recorder.ui.state import (
     program_state,
@@ -44,6 +45,8 @@ def combine_day(day: str, cam_id: WebcamID):
 
     try:
         create_daily_video(cam_id.name.lower(), day)
+    except (VideoCreationError, subprocess.CalledProcessError, OSError) as e:
+        logger.exception("Video creation failed: %s", e)
     finally:
         with program_state.lock:
             program_state.webcam_state[cam_id].video_create_start_time = None

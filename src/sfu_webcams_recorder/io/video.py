@@ -16,6 +16,13 @@ from sfu_webcams_recorder.config.settings import (
 )
 
 
+class VideoCreationError(Exception):
+    """Raised when video creation fails."""
+
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
 def create_daily_video(code: str, day: str):
     """Create a daily video using all downloaded webcam images for a day."""
 
@@ -26,7 +33,7 @@ def create_daily_video(code: str, day: str):
     imgs = sorted(camdir.glob("*.jpg"))
 
     if not imgs:
-        return
+        raise VideoCreationError("No webcam images to process")
 
     video_dir = VIDEOS_DIR / day / "videos"
     timestamps_dir = VIDEOS_DIR / day / "timestamps"
@@ -65,15 +72,12 @@ def create_daily_video(code: str, day: str):
             str(tmp_out),
         ]
 
-        try:
-            subprocess.run(cmd, check=True)
-        except subprocess.CalledProcessError:
-            return
+        subprocess.run(cmd, check=True)
 
         if tmp_out.exists():
             tmp_out.rename(outfile)
             shutil.rmtree(camdir)
         else:
-            return
+            raise VideoCreationError("Output video not found")
 
         timestamps_file.write_text("\n".join(timestamps))

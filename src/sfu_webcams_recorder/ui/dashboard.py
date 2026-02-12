@@ -39,8 +39,6 @@ def save_dashboard_snapshot():
 
     filename.write_text(text)
 
-    logger.info("Snapshot saved: %s", filename.name)
-
 
 def format_bytes(size_bytes: int) -> str:
     """Format bytes to be in GB."""
