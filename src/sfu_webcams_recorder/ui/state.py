@@ -28,7 +28,7 @@ class VideoState(StrEnum):
 class WebcamState:
     """State for a webcam thread."""
 
-    download_state: DownloadState = DownloadState.STARTING
+    download_state: DownloadState = DownloadState.SLEEPING
     video_state: VideoState = VideoState.IDLE
     download_start_time: float | None = None
     last_download_elapsed_time: float | None = None
