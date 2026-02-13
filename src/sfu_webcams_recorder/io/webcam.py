@@ -1,19 +1,19 @@
 """Download webcam images."""
 
 import hashlib
-from pathlib import Path
-import time
 import random
+import time
+from pathlib import Path
 
 import requests
 
-from sfu_webcams_recorder.utils import day_folder_name, now
 from sfu_webcams_recorder.config.settings import (
-    PICTURES_DIR,
-    DOWNLOAD_TIMEOUT_SECONDS,
     DEBUG_DOWNLOAD_DELAY,
+    DOWNLOAD_TIMEOUT_SECONDS,
+    PICTURES_DIR,
 )
 from sfu_webcams_recorder.ui.state import program_state
+from sfu_webcams_recorder.utils import day_folder_name, now
 
 
 class DuplicateWebcamImageError(Exception):

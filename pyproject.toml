@@ -13,3 +13,6 @@ dependencies = [
 
 [project.scripts]
 sfu-webcams-recorder = "sfu_webcams_recorder.main:main"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]

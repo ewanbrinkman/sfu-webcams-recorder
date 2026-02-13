@@ -1,37 +1,36 @@
 """The main program loops."""
 
-import time
-from threading import Thread
 import logging
 import subprocess
+import time
+from threading import Thread
 
 import requests
 
 from sfu_webcams_recorder.config.settings import (
-    PICTURES_DIR,
-    VIDEOS_DIR,
-    LOG_DIR,
-    SNAPSHOT_DIR,
-    INTERVAL,
-    DEBUG_VIDEO_CREATE,
     DEBUG_SNAPSHOT_LOG,
     DEBUG_SNAPSHOT_LOG_SECONDS,
+    DEBUG_VIDEO_CREATE,
+    INTERVAL,
+    LOG_DIR,
+    PICTURES_DIR,
+    SNAPSHOT_DIR,
+    VIDEOS_DIR,
 )
 from sfu_webcams_recorder.config.webcams import WEBCAM_URLS, WebcamID
-from sfu_webcams_recorder.io.webcam import (
-    download_webcam_image,
-    DuplicateWebcamImageError,
-)
 from sfu_webcams_recorder.io.video import VideoCreationError, create_daily_video
-from sfu_webcams_recorder.utils import day_folder_name
+from sfu_webcams_recorder.io.webcam import (
+    DuplicateWebcamImageError,
+    download_webcam_image,
+)
+from sfu_webcams_recorder.ui.dashboard import save_dashboard_snapshot, ui_loop
 from sfu_webcams_recorder.ui.state import (
-    program_state,
-    WebcamState,
     DownloadState,
     VideoState,
+    WebcamState,
+    program_state,
 )
-from sfu_webcams_recorder.ui.dashboard import ui_loop, save_dashboard_snapshot
-
+from sfu_webcams_recorder.utils import day_folder_name
 
 logger = logging.getLogger(__name__)
 
@@ -94,9 +93,10 @@ def webcam_loop(cam_id: WebcamID, url: str):
                 program_state.webcam_state[cam_id].error = None
         except (requests.RequestException, OSError, DuplicateWebcamImageError) as e:
             with program_state.lock:
+                error_text = str(e) if str(e) != "None" else "(No Description)"
                 program_state.webcam_state[
                     cam_id
-                ].error = f"{type(e).__name__}: {str(e) if str(e) != 'None' else '(No Description)'}"
+                ].error = f"{type(e).__name__}: {error_text}"
 
         elapsed = time.time() - start
         with program_state.lock:

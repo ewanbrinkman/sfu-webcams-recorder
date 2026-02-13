@@ -13,9 +13,12 @@ Run the following:
 
 After setup, run the following: `uv run sfu-webcams-recorder`
 
-## How To Format
+## How To Fix Lint Issues And Format
 
-After setup, run the following: `uv run ruff format`
+After setup, run the following:
+
+1. Fix lint issues: `uv run ruff check --fix`
+2. Format: `uv run ruff format`
 
 ## Output
 

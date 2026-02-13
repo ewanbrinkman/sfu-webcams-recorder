@@ -1,10 +1,10 @@
 """The program state."""
 
+import time
 from dataclasses import dataclass, field
 from enum import StrEnum, auto
-import time
-from threading import Lock, Condition
 from queue import Queue
+from threading import Condition, Lock
 
 from sfu_webcams_recorder.config.webcams import WebcamID
 

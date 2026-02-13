@@ -2,22 +2,22 @@
 
 import logging
 import time
-from rich.live import Live
-from rich.table import Table
+
 from rich import box
-from rich.panel import Panel
-from rich.console import Group, Console
 from rich.align import Align
+from rich.console import Console, Group
+from rich.live import Live
+from rich.panel import Panel
+from rich.table import Table
 from rich.text import Text
 
+from sfu_webcams_recorder.config.settings import SNAPSHOT_DIR, USE_24H_CLOCK
 from sfu_webcams_recorder.ui.state import (
-    program_state,
     DownloadState,
     VideoState,
+    program_state,
 )
 from sfu_webcams_recorder.utils import debug_enabled
-from sfu_webcams_recorder.config.settings import SNAPSHOT_DIR, USE_24H_CLOCK
-
 
 logger = logging.getLogger(__name__)
 

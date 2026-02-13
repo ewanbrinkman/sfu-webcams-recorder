@@ -1,15 +1,15 @@
 """Various utils."""
 
 import datetime
+
 import pytz
 
 from sfu_webcams_recorder.config.settings import (
-    DEBUG_VIDEO_CREATE,
-    DEBUG_VIDEO_CREATE_SLEEP,
     DEBUG_DOWNLOAD_DELAY,
     DEBUG_SNAPSHOT_LOG,
+    DEBUG_VIDEO_CREATE,
+    DEBUG_VIDEO_CREATE_SLEEP,
 )
-
 
 TZ = pytz.timezone("America/Vancouver")
 

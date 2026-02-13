@@ -1,18 +1,18 @@
 """Create a daily video of all the webcam images."""
 
-import time
 import shutil
 import subprocess
 import tempfile
+import time
 from pathlib import Path
 
 from sfu_webcams_recorder.config.settings import (
-    PICTURES_DIR,
-    VIDEOS_DIR,
-    FPS,
-    FFMPEG_CODEC_ARGS,
     DEBUG_VIDEO_CREATE_SLEEP,
     DEBUG_VIDEO_CREATE_SLEEP_SECONDS,
+    FFMPEG_CODEC_ARGS,
+    FPS,
+    PICTURES_DIR,
+    VIDEOS_DIR,
 )
 
 
