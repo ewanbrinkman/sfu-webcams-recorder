@@ -21,7 +21,7 @@ FFMPEG_CODEC_ARGS = [
 # -----------------------------
 
 INTERVAL = 10
-DOWNLOAD_TIMEOUT_SECONDS = 60
+DOWNLOAD_TIMEOUT_SECONDS = 5
 
 # -----------------------------
 # Paths
