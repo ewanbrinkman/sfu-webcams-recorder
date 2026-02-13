@@ -3,6 +3,7 @@
 import logging
 import subprocess
 import time
+from datetime import datetime, timedelta
 from threading import Thread
 
 import requests
@@ -140,17 +141,24 @@ def video_worker_loop():
         program_state.video_queue.task_done()
 
 
+def seconds_until_midnight():
+    """Get the number of seconds until midnight."""
+    now = datetime.now()
+    next_midnight = (now + timedelta(days=1)).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
+    return (next_midnight - now).total_seconds()
+
+
 def snapshot_loop():
     """Save dashboard snapshot every hour on the hour."""
     while True:
-        now = time.time()
-
-        # Seconds until next hour boundary if debug is not enabled.
         sleep_time = (
             DEBUG_SNAPSHOT_LOG_SECONDS
             if DEBUG_SNAPSHOT_LOG
-            else 3600 - (int(now) % 3600)
+            else seconds_until_midnight()
         )
+
         time.sleep(sleep_time)
 
         try:

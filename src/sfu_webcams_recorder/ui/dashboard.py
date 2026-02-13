@@ -141,7 +141,7 @@ def render_table():
                 and state.video_create_start_time
             ):
                 # Currently processing.
-                encode_time = fmt_seconds(now - state.video_create_start_time)
+                encode_time = fmt_duration(now - state.video_create_start_time)
             elif cam_id in [job[1] for job in queue_list]:
                 # Waiting in queue.
                 position = [job[1] for job in queue_list].index(cam_id) + 1
